@@ -10,156 +10,250 @@ options{
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
-
+import java.util.Set;
 }
 @lexer::members{
-  	   boolean lexicalError;
-         public ArrayList<Integer> tracker=new ArrayList<Integer>(){{   add(0);}};;
-         public static Stack<Stack<ASTNode>> tempStack=new Stack<Stack<ASTNode>>(); //list of children of the current subroot
-         Stack<ASTNode> nodeStack=new Stack<ASTNode>(); //all subtrees
-         ASTNode Ptree=new ASTNode(); //The root of the program
-         static int scope=0;
-         static int count=0;
-         static int isVar=0;
-         static int isClass=0;
-         static int isFinal=0;
-         static int isProgram=0;
-         static int isArray=0;
-         private java.util.Queue<Token> queue = new java.util.LinkedList<Token>();
-         public static SymbolTable symbolTable=new SymbolTable();
+ boolean lexicalError;
+	         public ArrayList<Integer> tracker=new ArrayList<Integer>(){{   add(0);}};;
+	         public static Stack<Stack<ASTNode>> tempStack=new Stack<Stack<ASTNode>>(); //list of children of the current subroot
+	         Stack<ASTNode> nodeStack=new Stack<ASTNode>(); //all subtrees
+	         ASTNode Ptree=new ASTNode(); //The root of the program
+	         static int scope=0;
+	         static int count=0;
+	         static int isVar=0;
+	         static int isClass=0;
+	         static int isFinal=0;
+	         static int isProgram=0;
+	         static int isArray=0;
+	         private java.util.Queue<Token> queue = new java.util.LinkedList<Token>();
+	         public static SymbolHashTable symbolTable=new SymbolHashTable();
+
+			public void setTable(){
+				symbolTable.put(0, new SymbolTableNode("int","int", "preloaded", 0,0));
+				symbolTable.put(0, new SymbolTableNode("char","char", "preloaded", 0,0));
+				symbolTable.put(0, new SymbolTableNode("null","null", "preloaded", 0,0));
+				symbolTable.put(0, new SymbolTableNode("chr","chr", "preloaded", 0,0));
+				symbolTable.put(0, new SymbolTableNode("ord","ord", "preloaded", 0,0));
+				symbolTable.put(0, new SymbolTableNode("len","len", "preloaded", 0,0));
+				symbolTable.put(0, new SymbolTableNode("program","program", "keyword", 0,0));
+				symbolTable.put(0, new SymbolTableNode("class","class", "keyword", 0,0));
+				symbolTable.put(0, new SymbolTableNode("if","if", "keyword", 0,0));
+				symbolTable.put(0, new SymbolTableNode("else","else", "keyword", 0,0));
+				symbolTable.put(0, new SymbolTableNode("while","while", "keyword", 0,0));
+				symbolTable.put(0, new SymbolTableNode("read","read", "keyword", 0,0));
+				symbolTable.put(0, new SymbolTableNode("print","print", "keyword", 0,0));
+				symbolTable.put(0, new SymbolTableNode("return","return", "keyword", 0,0));
+				symbolTable.put(0, new SymbolTableNode("void","void", "keyword", 0,0));
+				symbolTable.put(0, new SymbolTableNode("final","final", "keyword", 0,0));
+				symbolTable.put(0, new SymbolTableNode("new","new", "keyword", 0,0));
+			}
+	         public int lexGetLine(){
+	           return getLine();
+	         }
+	         public SymbolTableNode node;
+	         @Override
+	         public Token nextToken() {
+	           if(!queue.isEmpty()) {
+	             return queue.poll();
+	           }
+	           Token next = super.nextToken();
+
+	           while(next.getType()==WhiteSpace){
+
+	           }
+	           if(next.getType() != Unknown) {
+	             Token curr=next;
+	             if(isVar==1 && next.getText().equals("(") && next.getType()==TOK_IDENTIFIER){
+	             try{
+	               node.structure="method(";
+					 node.scope=scope;
+					 System.out.println("is method method");
+	               super.nextToken();
+	               while(!next.getText().equals(")")){
+	                   node.structure+=getText();
+	               }
+	               System.out.println("structure: "+node.structure);
+	             }catch(NullPointerException e){
+	               System.out.println("Variable already exists. method");
+	             }
+	             }
+	             if(next.getText().equals("int") ||next.getText().equals("char") || next.getText().equals("null") ||next.getText().equals("chr") ||next.getText().equals("ord")||next.getText().equals("len")||next.getText().equals("program")||next.getText().equals("class")
+						 ||next.getText().equals("if") ||next.getText().equals("else")||next.getText().equals("while")||next.getText().equals("read")||next.getText().equals("print")||next.getText().equals("return")||next.getText().equals("void")||next.getText().equals("final")||next.getText().equals("new")){
+	             	if(isVar==1){
+						System.out.println(next.getText()+" is reserved keyword");
+
+					}
+				 }
+	             if(next.getText().equals("program")){
+
+						 try {
+							 node = new SymbolTableNode();
+							 node.type = getText();
+							 node.structure = "program";
+							 node.name = null;
+							 node.scope = 0;
+							 node.isFinal = 0;
+							 isProgram = 1;
+						 } catch (NullPointerException e) {
+							 System.out.println("Error in program");
+						 }
+
+	             }
+	             if(next.getText().equals("class")){
+
+	             	try {
+						node = new SymbolTableNode();
+
+							node.type = getText();
+							node.structure = "class";
+							node.scope = scope;
+							isVar = 1;
+						}catch(NullPointerException e){
+							System.out.println("ERROR CLASS");
+						}
+
+	             }
+	             if(next.getType()==TOK_FINAL){
+
+						 try {
+							 node = new SymbolTableNode();
+							 node.type = getText();
+							 node.structure = "final";
+							 node.scope = scope;
+							 isVar = 1;
+						 } catch (NullPointerException e) {
+							 System.out.println("ERROR FINAL");
+						 }
+
+	             }
+	             if (next.getType() == TOK_IDENTIFIER && (next.getText().equals("int") || next.getText().equals("char"))){
+
+	               node=new SymbolTableNode();
+	               node.type=getText();
+	               isVar=1;
+
+	             }
+	             if(next.getType()== TOK_IDENTIFIER  && !(next.getText().equals("int") || next.getText().equals("char") ||  next.getText().equals("program") ||  next.getText().equals("class") || next.getText().equals("final") )){
+	             if(isVar==1){
+
+	               try{
+	               node.name=getText();
+	               node.scope=scope;
+	               if(isClass==0 && isProgram==0 && isArray==0){
+	                   node.structure="variable";
+	               }
+	               isVar=0;
+	               }catch(NullPointerException e){
+	                   System.out.println("ERROR "+getText());
+	               }
+	              }
+					 if(isProgram==1){
+						 try{
+							 node.name=getText();
+							 node.scope=scope;
+							 node.structure="program name";
+							 isProgram=2;
+						 }catch(NullPointerException e){
+							 System.out.println("ERROR "+getText());
+						 }
+					 }
+	             }
+	             if(node!=null && node.name!=null && !checkScope(node.name)){
+	               System.out.println("inserting "+ getText());
+	               symbolTable.insert(node.name, node.type, node.structure, node.isFinal, node.scope);
+	               node=null;
+	             }else {
+	             	try{
+	             	if(checkScope(node.name)){
+						System.out.println("variable already exists: " + getText());
+					}else if(node==null && node.name==null){
+						System.out.println("ERROR " + getText());
+					}
+
+				 }catch(NullPointerException e){
+
+					 }
+	             }
+				   if(next.getText().equals("{")){
+	               	count++;
+	               	tracker.add(count);
+	               	scope=count;
+	             }
+	             if(next.getText().equals("}")){
+
+					 tracker.remove(tracker.size()-1);
+					 scope=tracker.get(tracker.size()-1);
+
+	             }
+	             return curr;
+	           }
 
 
-         public int lexGetLine(){
-           return getLine();
-         }
-         public SymbolTableNode node;
-         @Override
-         public Token nextToken() {
-           if(!queue.isEmpty()) {
-             return queue.poll();
-           }
-           Token next = super.nextToken();
+	           StringBuilder builder = new StringBuilder();
 
-           while(next.getType()==WhiteSpace){
+	           while(next.getType() == Unknown) {
+	             next = super.nextToken();
+	           }
 
-           }
-           if(next.getType() != Unknown) {
-             Token curr=next;
-             if(isVar==1 && next.getType()==TOK_LP){
-             try{
-               node.structure="method(";
-               super.nextToken();
-               while(next.getType()!=TOK_RP){
-                   node.structure+=getText();
-               }
-             }catch(NullPointerException e){
-               System.out.println("Variable already exists.");
-             }
-             }
-             if(next.getType()==TOK_PROGRAM){
-                try{
-                node=new SymbolTableNode();
-                node.type=getText();
-                node.structure="program";
-                isVar=1;
-                }catch(NullPointerException e){
-                        System.out.println("Variable already exists.");
-                }
-             }
-             if(next.getType()==TOK_CLASS){
-                try{
-                node=new SymbolTableNode();
-                node.type=getText();
-                node.structure="class";
-                isVar=1;
-                }catch(NullPointerException e){
-                        System.out.println("Variable already exists.");
-                      }
-             }
-             if(next.getType()==TOK_FINAL){
-             try{
-             node=new SymbolTableNode();
-               node.type=getText();
-               node.structure="final";
-               isVar=1;
-               }catch(NullPointerException e){
-                       System.out.println("Variable already exists.");
-                     }
-             }
-             if (next.getType() == TOK_IDENTIFIER && (next.getText().equals("int") || next.getText().equals("char"))){
-              try{
-               node=new SymbolTableNode();
-               node.type=getText();
-               isVar=1;
-               }catch(NullPointerException e){
-                       System.out.println("Variable already exists.");
-                     }
-             }
-             if(next.getType()== TOK_IDENTIFIER  && !(next.getText().equals("int") || next.getText().equals("char"))){
-             if(isVar==1){
-               try{
-               node.name=getText();
-               node.scope=scope;
-               if(isClass==0 && isProgram==0 && isArray==0){
-                   node.structure="variable";
-               }
-               }catch(NullPointerException e){
-                   System.out.println("ERROR "+getText());
-               }
-              }
-             }
-             if(node!=null && node.name!=null && !checkScope(node.name) && (isvar==1 || isClass==1 || isArray==1)){
-               System.out.println("inserting "+ getText());
-               symbolTable.insert(node);
-               node=null;
-             }else{
-               if(node!=null && node.name!=null){
-               System.out.println("variable already exists: "+getText());
-               node=null;
-               }
-             }
-             System.out.println("type: "+next.getType()==TOK_LCB)
-             if(next.getType()==TOK_LCB){
-               count++;
-               tracker.add(count);
-               scope=count;
-             }
-             if(next.getType()==TOK_RCB){
-               tracker.remove(tracker.size()-1);
-               scope=tracker.get(tracker.size()-1);
-             }
-             return curr;
-           }
+	           queue.offer(next);
 
+	           return new CommonToken(Unknown, builder.toString());
+	         }
+	       public Boolean checkScope(String name){
+				   SymbolTableNode n=null;
+				   if(name.equals("int") ||name.equals("char") || name.equals("null") ||name.equals("chr") ||name.equals("ord")||name.equals("len")||name.equals("program")||name.equals("class")
+						   ||name.equals("if") ||name.equals("else")||name.equals("while")||name.equals("read")||name.equals("print")||name.equals("return")||name.equals("void")||name.equals("final")||name.equals("new")){
+				   	return true;
+				   }
 
-           StringBuilder builder = new StringBuilder();
+				   for(int i=0; i<tracker.size(); i++) {
+					  // for(Integer temp: set) {
+						   n = (SymbolTableNode) symbolTable.get(tracker.get(i), name);
 
-           while(next.getType() == Unknown) {
-             next = super.nextToken();
-           }
+					//   }
+					try {
+						if (n != null)
+							return true;
+					}catch(NullPointerException e){
+							return false;
+						}
+					}
+					return false;
 
+		   }
+	            public void addTempStack(String type, String name){
+	                  Stack<ASTNode> temp=new Stack<>();
+	                  temp.push(new ASTNode(type, name));
+	                  tempStack.push(temp);
+				}
+			public void printSymbolTable(){
+					Set<Integer> keys=symbolTable.SymbolHashTable().keySet();
+					for(Integer i: keys){
 
-           queue.offer(next);
+						SymbolTableNode n = (SymbolTableNode) symbolTable.get(i);
+						while(n != null)
+						{
+							System.out.println(symbolTable.get(i, n.name).toString());
+							n=n.child;
+						}
+					}
 
-           return new CommonToken(Unknown, builder.toString());
-         }
-       public Boolean checkScope(String name){
-               if(symbolTable.get(name)==null){
-                   return false;
-               }else{
-                   return true;
-               }
-           }
-            public void addTempStack(String type, String name){
-                  Stack<ASTNode> temp=new Stack<>();
-                  temp.push(new ASTNode(type, name));
-                  tempStack.push(temp);
-              }
+			}
+
 }
 @parser:: members{
 grLexer lexer;
 public void setLexer(grLexer lexer){
 			this.lexer=lexer;
+		}
+@Override
+		public void enterRule(ParserRuleContext localctx, int state, int ruleIndex) {
+			super.enterRule(localctx, state, ruleIndex);
+           // System.out.println(ruleNames[ruleIndex]);
+			/*if((ruleNames[ruleIndex]).equals("formPars")){
+				System.out.println("pars");
+			    System.out.println(lexer.getText());
+			}*/
 		}
 }
 
@@ -184,14 +278,22 @@ lexicalError=true;
 }
 
 };
-TOK_INVALID_IDENTIFIER: '_' TOK_IDENTIFIER
-  | DIGIT TOK_IDENTIFIER {lexicalError=true;};
-TOK_IDENTIFIER : LETTER (LETTER|DIGIT)*;
-TOK_INVALID_CHARLIT: '\'' (TOK_CHARLIT)? ~('\''){lexicalError=true;};
-TOK_CHARLIT: '\''(LETTER|DIGIT|'\\n'|'\\r'|'\\t')'\'';
-UNRECOGNIZED_SYMBOL: . {lexicalError=true;};
+//Keywords
+TOK_CLASS : 'class';
+TOK_FINAL : 'final';
+TOK_ELSE : 'else';
+TOK_IF : 'if';
+TOK_NEW : 'new';
+TOK_READ : 'read';
+TOK_RETURN : 'return';
+TOK_VOID : 'void';
+TOK_WHILE : 'while';
+TOK_PRINT : 'print';
+TOK_PROGRAM: 'program';
+
 //Rules
-prog: TOK_PROGRAM TOK_IDENTIFIER (constDecl|varDecl|classDecl)* TOK_LCB (methodDecl)* TOK_RCB;
+program: prog;
+prog: TOK_PROGRAM TOK_IDENTIFIER (constDecl|varDecl|classDecl)* TOK_LCB (methodDecl)* TOK_RCB EOF;
 
 varDecl: varType TOK_IDENTIFIER  (TOK_COMMA TOK_IDENTIFIER)* TOK_SEMI;
 
@@ -223,18 +325,7 @@ x:TOK_IDENTIFIER ((TOK_LP expr TOK_RP)?|(TOK_LB (expr)? TOK_RB)*);
 
 varType: TOK_IDENTIFIER (TOK_LB TOK_RB)?;
 
-//Keywords
-TOK_PROGRAM : 'program';
-TOK_CLASS : 'class';
-TOK_FINAL : 'final';
-TOK_ELSE : 'else';
-TOK_IF : 'if';
-TOK_NEW : 'new';
-TOK_READ : 'read';
-TOK_RETURN : 'return';
-TOK_VOID : 'void';
-TOK_WHILE : 'while';
-TOK_PRINT : 'print';
+
 
 //MicroJava Delimiters
 TOK_COMMA : ',';
@@ -259,6 +350,8 @@ TOK_OP_ADD : OP_ADD_PLUS
    | OP_ADD_MINUS ;
 
 
+
+
 TOK_OP_TIMES : OP_MUL_TIMES //OPP_MUL_TIMES
 | OP_MUL_DIV
 | OP_MUL_MOD;
@@ -276,7 +369,13 @@ OP_ADD_MINUS: '-';
 OP_MUL_TIMES:'*';
 OP_MUL_DIV:'/';
 OP_MUL_MOD:'%';
-
+//
+TOK_INVALID_IDENTIFIER: '_' TOK_IDENTIFIER
+  | DIGIT TOK_IDENTIFIER {lexicalError=true;};
+TOK_IDENTIFIER : LETTER (LETTER|DIGIT)*;
+TOK_INVALID_CHARLIT: '\'' (TOK_CHARLIT)? ~('\''){lexicalError=true;};
+TOK_CHARLIT: '\''(LETTER|DIGIT|'\\n'|'\\r'|'\\t')'\'';
+UNRECOGNIZED_SYMBOL: . {lexicalError=true;};
 //fragments
 fragment LETTER: [a-zA-Z];
 fragment DIGIT: [0-9];

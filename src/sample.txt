@@ -1,4 +1,5 @@
-program prog
-{int name= 10;
-int name=2;
+program p{
+int main(int i){
+
+}
 }

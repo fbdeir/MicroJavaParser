@@ -16,10 +16,12 @@ public class main  {
         grLexer lexer = new grLexer( CharStreams.fromFileName("C:\\Users\\MSE\\IdeaProjects\\MicroJavaParser\\src\\sample.txt"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         grParser parser = new grParser(tokens);
+        grBaseListener listener=new grBaseListener();
         parser.setLexer(lexer);
-        lexer.getAllTokens();
+       //lexer.getAllTokens();
         System.out.println("Symbol Table");
-        System.out.println(lexer.symbolTable.toString());
+        lexer.printSymbolTable();
+        parser.prog();
         /*System.out.println("tempstack: ");
         Arrays.toString(lexer.tempStack.toArray());
         System.out.println("nodestack: ");

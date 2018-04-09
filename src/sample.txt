@@ -1,0 +1,4 @@
+program prog
+{int name= 10;
+int name=2;
+}

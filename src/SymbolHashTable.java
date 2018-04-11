@@ -25,6 +25,19 @@ public final class SymbolHashTable extends Hashtable{
 
 
     }
+    public static void insert(String name, String type,String structure, int isFinal, int scope, int isArray) {
+        SymbolTableNode n= (SymbolTableNode) symbolhashtable.get(scope);
+        if(n==null){
+            symbolhashtable.put(scope, new SymbolTableNode(name, type, structure, isFinal, scope, isArray));
+        }else {
+            while (n.child != null) {
+                n = n.child;
+            }
+            n.child = new SymbolTableNode(name, type, structure, isFinal, scope, isArray);
+        }
+
+
+    }
 
     public static SymbolTableNode get(int scope, String name) {
 

@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class SymbolTableNode {
     public String name;
     public String type;
@@ -5,7 +7,18 @@ public class SymbolTableNode {
     public int scope;
     public int isFinal;
     public SymbolTableNode child;
-
+    public int isArray;
+    public ArrayList<SymbolTableNode> parameters;
+    public SymbolTableNode(String name, String type, String structure, int isFinal, int scope, int isArray){
+        this.name=name;
+        this.type=type;
+        this.scope=scope;
+        this.structure=structure;
+        this.isFinal=isFinal;
+        this.child=null;
+        this.parameters=new ArrayList<>();
+        this.isArray=isArray;
+    }
     public SymbolTableNode(String name, String type, String structure, int isFinal, int scope){
         this.name=name;
         this.type=type;
@@ -13,6 +26,7 @@ public class SymbolTableNode {
         this.structure=structure;
         this.isFinal=isFinal;
         this.child=null;
+        this.parameters=new ArrayList<>();
     }
     public SymbolTableNode(){
         this.name=null;

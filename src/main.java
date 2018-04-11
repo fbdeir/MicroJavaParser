@@ -18,10 +18,13 @@ public class main  {
         grParser parser = new grParser(tokens);
         grBaseListener listener=new grBaseListener();
         parser.setLexer(lexer);
+        lexer.setTable();
+
        //lexer.getAllTokens();
+
+        parser.prog();
         System.out.println("Symbol Table");
         lexer.printSymbolTable();
-        parser.prog();
         /*System.out.println("tempstack: ");
         Arrays.toString(lexer.tempStack.toArray());
         System.out.println("nodestack: ");
